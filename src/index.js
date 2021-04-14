@@ -1,7 +1,12 @@
 import React from './mini-react/react'
 
 
-const div = <div id="box">
+const div = <div id="box"
+  style={{
+    width:"200px",
+    border:"1px solid #000"
+  }}
+>
 <h1>hello react</h1>
 <ul className="list">
   <li>React-1</li>
