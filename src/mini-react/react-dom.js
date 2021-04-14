@@ -4,7 +4,7 @@ function render(vDom, container, cb) {
 
   container.appendChild(node);
 
-  cb&&cb();
+  cb && cb();
 }
 //根据虚拟DOM 构建真实DOM
 function createNode(vDom) {
@@ -12,11 +12,16 @@ function createNode(vDom) {
   if (vDom.$$typeof === textType) {
     node = document.createTextNode(vDom.content);
   } else if (vDom.$$typeof === elementType) {
-    // 元素
-    node = document.createElement(vDom.type);
-    createProps(node, vDom.props);
-    // 判断元素是否有子节点，然后递归
-    createChild(node, vDom.children);
+    if (typeof vDom.type === "string") {
+      // 元素
+      node = document.createElement(vDom.type);
+      createProps(node, vDom.props);
+      // 判断元素是否有子节点，然后递归
+      createChild(node, vDom.children);
+    } else if(vDom.type.isReactComponent){
+      // 类组件
+      node = createClass(vDom)
+    }
   }
 
   return node;
@@ -30,6 +35,39 @@ function createChild(node, children) {
   children.forEach((item) => {
     render(item, node);
   });
+}
+
+/* 生命周期函数 */
+
+function stateFromProps(Cmp,props){
+  if(Cmp.getDerivedStateFromProps){
+    return Cmp.getDerivedStateFromProps(props);
+  }
+  return {}
+}
+
+function didMount(cmp){
+  if(cmp.componentDidMount){
+    setTimeout(()=>{
+      cmp.componentDidMount();
+    })
+  }
+}
+
+// 初始化类组件
+function createClass(Cmp){
+  let cmp = new Cmp.type(Cmp.props);
+  let nextState = stateFromProps(Cmp,Cmp.props);
+  if(cmp.state){
+    Object.assign(cmp.state,nextState);
+  }
+  let vDom = cmp.render();
+  let node = createNode(vDom);
+  didMount(cmp);
+  cmp.updater = function(nextProps,nextState){
+    
+  };
+  return node;
 }
 
 // 创建属性

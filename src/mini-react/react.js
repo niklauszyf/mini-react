@@ -25,10 +25,20 @@ function createElement(type,props,...child){
 
 }
 
-const React={
-  createElement
+class Component{
+  constructor(props){
+    this.props=props;
+    this.state=null;
+  }
+  static isReactComponent={};
+  setState(){}
 }
 
-export {createElement, elementType, textType}
+const React={
+  createElement,
+  Component
+}
+
+export {createElement, elementType, textType, Component}
 
 export default React;
