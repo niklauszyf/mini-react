@@ -31,7 +31,14 @@ class Component{
     this.state=null;
   }
   static isReactComponent={};
-  setState(){}
+  // 如果nextState是函数，要执行拿到返回结果。如果是对象，则直接进行后续操作
+  setState(nextState){
+    if(this.isBatchUpdate){
+      this.nextStates.push(nextState)
+    } else {
+      this.updater(this.props,Object.assign({},this.state,nextState))
+    }
+  }
 }
 
 const React={

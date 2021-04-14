@@ -4,10 +4,30 @@ import ReactDOM from "./mini-react/react-dom";
 
 class App extends React.Component {
   state={count:1}
+  addCount=()=>{
+    this.setState({
+      count:this.state.count+1
+    });
+    console.log(this.state.count);
+    this.setState({
+      count:this.state.count+1
+    });
+    console.log(this.state.count);
+    this.setState({
+      count:this.state.count+1
+    });
+    console.log(this.state.count);
+  }
+  componentDidMount(){
+    setTimeout(()=>{
+      this.addCount()
+    })
+
+  }
   render(){
     console.log(this);
     return <div>
-      {this.state.count}
+      <p>{this.state.count}</p>
       <button onClick={()=>{
         this.setState({
           count:this.state.count+1
