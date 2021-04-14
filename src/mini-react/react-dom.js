@@ -65,7 +65,7 @@ function createClass(Cmp){
   let node = createNode(vDom);
   didMount(cmp);
   cmp.updater = function(nextProps,nextState){
-    
+
   };
   return node;
 }
