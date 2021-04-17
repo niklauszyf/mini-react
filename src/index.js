@@ -2,64 +2,88 @@
 import React from "./mini-react/react";
 import ReactDOM from "./mini-react/react-dom";
 
-class App extends React.Component {
-  state={count:1}
-  addCount=()=>{
-    this.setState({
-      count:this.state.count+1
-    });
-    console.log(this.state.count);
-    this.setState({
-      count:this.state.count+1
-    });
-    console.log(this.state.count);
-    this.setState({
-      count:this.state.count+1
-    });
-    console.log(this.state.count);
-  }
-  componentDidMount(){
-    setTimeout(()=>{
-      this.addCount()
-    })
-
-  }
+class Count extends React.Component {
+  state = {count:1}
   render(){
-    console.log(this);
     return <div>
-      <p>{this.state.count}</p>
-      <button onClick={()=>{
-        this.setState({
-          count:this.state.count+1
-        })
-      }}>按钮</button>
+        <p>{this.state.count}</p>
+        <button id="btn" onClick={()=>{
+            this.setState({
+              count: this.state.count+1
+            })
+        }}>按钮</button>
     </div>
   }
 }
-
-// const div = (
-//   <div
-//     id="box"
-//     style={{
-//       width: "200px",
-//       border: "1px solid #000",
-//     }}
-//   >
-//     <h1>hello react</h1>
-//     <ul className="list">
-//       <li>React-1</li>
-//       <li>React-2</li>
-//     </ul>
-//     <button
-//       onClick={() => {
-//         alert(1);
-//       }}
-//     >
-//       按钮
-//     </button>
-//   </div>
-// );
-// console.log(div);
+class Li extends React.Component {
+  render(){
+    const {data,remove} = this.props;
+    const {id,title} = data;
+    return <li>{title} --- <button onClick={()=>{
+      remove(id);
+    }}>删除</button></li>
+  }
+}
+class Todo extends React.Component {
+  render(){
+    const {index,todo,addTodo,remove} = this.props;
+    return <div 
+      className={"todo-"+index}
+      style={{
+        width: 200 + (index*20) + "px",
+        border: "2px solid #000"
+      }}
+    >
+      <h2>todo - <button onClick={addTodo}>添加</button></h2>
+      {todo.map(item=>{
+          return <Li data={item} key={item.id} remove={remove} />
+      })}  
+    </div>
+  }
+}
+class App extends React.Component {
+  state = {
+    index: 1,
+    data:[
+      {
+        id: 0,
+        title: "这是todo-0"
+      },{
+        id: 1,
+        title: "这是todo-1"
+      }
+    ]
+  }
+  addTodo=()=>{
+    const {index,data} = this.state;
+    this.setState({
+      index: index + 1,
+      data: [...data,{
+        id: index + 1,
+        title: "这是todo-"+(index+1)
+      }]
+    })
+  }
+  remove=(id)=>{
+    const {data} = this.state;
+    this.setState({
+      data: data.filter(item=>item.id!==id)
+    })
+  }
+  render(){
+    const {index,data} = this.state;
+    return <div>
+        <Count />
+        <hr />
+        <Todo 
+          addTodo = {this.addTodo}
+          index={index}
+          todo={data}
+          remove = {this.remove}
+        />       
+    </div>
+  }
+}
 
 ReactDOM.render(
   <App/>, 
