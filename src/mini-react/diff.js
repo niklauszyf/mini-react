@@ -28,6 +28,8 @@ import { elementType, textType } from "./react";
  *    
  */
 
+/*test*/
+
 function diff(oldTree,newTree){
   // console.log(oldTree,newTree);
   diffNode(oldTree,newTree)
