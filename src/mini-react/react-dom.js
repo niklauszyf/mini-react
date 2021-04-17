@@ -1,3 +1,4 @@
+import diff from "./diff";
 import { elementType, textType } from "./react";
 function render(vDom, container, cb) {
   const node = createNode(vDom);
@@ -65,9 +66,10 @@ function didMount(cmp){
  */
 
 function batchUpdate(cmp,fn,...payload){
-  cmp.isBatchUpdate = true;
+  let info;
   cmp.nextStates = [];
-  fn.apply(cmp,payload)
+  cmp.isBatchUpdate = true;
+  info=fn.apply(cmp,payload);
   cmp.isBatchUpdate = false;
   if(cmp.nextStates.length>0){
     let nextState={};
@@ -77,20 +79,65 @@ function batchUpdate(cmp,fn,...payload){
     cmp.nextStates.length=0;
     cmp.updater(cmp.props,Object.assign({},cmp.state,nextState));
   }
+  return info;
+}
+
+function shouldUpdate(cmp,nextProps,nextState){
+   if(cmp.shouldComponentUpdate){
+    return batchUpdate(cmp,cmp.shouldComponentUpdate,nextProps,nextState)
+   }
+   return true
+}
+
+function beforeUpdate(cmp,prevProps,prevState){
+  if(cmp.getSnapshotBeforeUpdate){
+    if(cmp.componentDidUpdate){ 
+      return batchUpdate(cmp,cmp.getSnapshotBeforeUpdate,prevProps,prevState)
+    }else{
+      console.error("使用getSnapshotBeforeUpdate生命周期函数，必须添加componentDidUpdate");
+    }
+  }
+}
+
+function didUpdate(cmp,prevProps,prevState,prevDOM){
+  if(cmp.componentDidUpdate){
+    batchUpdate(cmp,cmp.componentDidUpdate,prevProps,prevState,prevDOM);
+  }
 }
 
 // 初始化类组件
 function createClass(Cmp){
+
   let cmp = new Cmp.type(Cmp.props);
+  // 挂载阶段getDerivedPropsFromState
   let nextState = stateFromProps(Cmp,Cmp.props);
-  if(cmp.state){
-    Object.assign(cmp.state,nextState);
-  }
+  cmp.state=Object.assign(cmp.state,nextState);
+  // 挂载阶段 render
   let vDom = cmp.render();
   let node = createNode(vDom);
+  Cmp._cmp = cmp;
+  // 挂载阶段 componentDidMount
   didMount(cmp);
   cmp.updater = function(nextProps,nextState){
-    console.log("updater",nextState);
+    // 更新阶段 static getDerivedStateFromProps
+    Object.assign(nextState,stateFromProps(Cmp,nextProps));
+    // 更新阶段 shouldComponentUpdate
+    if(!shouldUpdate(cmp,nextProps,nextState)){
+      return ;
+    }
+    let prevProps = cmp.props;
+    let prevState = cmp.state;
+    cmp.props = nextProps;
+    cmp.state = nextState;
+    // 更新阶段 render()
+    let newVDom=cmp.render();
+    // 更新阶段 getSnapshotBeforeUpdate
+    let prevDom = beforeUpdate(cmp,prevProps,prevState);
+    // 对比新旧虚拟DOM，更新真实DOM componentDidUpdate
+    diff(vDom,newVDom);
+    didUpdate(cmp,prevProps,prevState,prevDom)
+
+
   };
   return node;
 }
@@ -103,7 +150,7 @@ function createProps(node, props) {
     } else if (s.slice(0, 2) === "on") {
       // React 中，有自己的一套事件合成机制
       node[s.toLowerCase()] = props[s];
-      // node[s.toLowerCase()]=(e)=>{
+      // node[s.toLowerCase()]=(e)=>{s
       //   batchUpdate(cmp,props[s],event,"");
       // }
     } else {

@@ -28,7 +28,7 @@ function createElement(type,props,...child){
 class Component{
   constructor(props){
     this.props=props;
-    this.state=null;
+    this.state={};
   }
   static isReactComponent={};
   // 如果nextState是函数，要执行拿到返回结果。如果是对象，则直接进行后续操作
