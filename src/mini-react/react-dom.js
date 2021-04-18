@@ -24,7 +24,7 @@ function createNode(vDom) {
       node = createClass(vDom)
     }
   }
-
+  vDom._DOM=node;
   return node;
 }
 
@@ -134,9 +134,10 @@ function createClass(Cmp){
     // 更新阶段 getSnapshotBeforeUpdate
     let prevDom = beforeUpdate(cmp,prevProps,prevState);
     // 对比新旧虚拟DOM，更新真实DOM componentDidUpdate
-    diff(vDom,newVDom);
+    vDom=diff(vDom,newVDom,createNode);
+    // console.log(vDom);
     didUpdate(cmp,prevProps,prevState,prevDom)
-
+    return vDom;
 
   };
   return node;
