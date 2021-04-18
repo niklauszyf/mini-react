@@ -3,11 +3,49 @@ import { elementType, textType } from "./react";
 /**
  * 节点会产生6种更新：
  * 1.replace 节点被替换
+ *    -- parentNode.replaceChild(newNode,currentNode)
+ *    --  {
+ *          type:"replace",
+ *          parent,
+ *          newNode,
+ *          currentNode  
+ *        }
  * 2.remove 节点被删除
+ *    -- node.remove()
+ *    -- {
+ *        type:"remove",
+ *        node,
+ *        }  
  * 3.move 位置有变化
+ *    -- parentNode.insertBefore(Node,referenceNode)
+ *    -- {
+ *        type:"move",
+ *        parentNode,
+ *        newNode,
+ *        referenceNode
+ *        }
  * 4.insert 需要插入新节点
+ *    -- -- parentNode.insertBefore(newNode,referenceNode)
+ *    -- {
+ *        type:"insert",
+ *        parentNode,
+ *        newNode,
+ *        referenceNode
+ *        }
  * 5.text 文本节点有更新
+ *     -- node.textContent = newContent;
+ *     --{
+ *         type:"text",
+ *         node,
+ *         newContent
+ *        }
  * 6.props 属性值有变化
+ *    -- node[s]=props[s]
+ *    -- {
+ *        type:"props",
+ *        node,
+ *        props
+ *        }
  */
 
 /**
@@ -49,6 +87,7 @@ function diff(oldTree,newTree){
  */
 
 function diffNode(oldNode,newNode){
+  let patchs = [];
   if(oldNode.type!==newNode.type){
     console.log("替换");
   }else if(oldNode.$$typeof === textType){
