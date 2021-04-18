@@ -3,8 +3,10 @@ const textType = Symbol("react.text");
 
 function createElement(type,props,...child){
   // console.log(type,props,children);
+  let key=props.key;
   delete props.__self;
   delete props.__source;
+  delete props.key
   
   let children = child.flat(Infinity)
   children=children.map(item=>{
@@ -20,7 +22,8 @@ function createElement(type,props,...child){
     $$typeof:elementType,
     type,
     props,
-    children
+    children,
+    key
   }
 
 }

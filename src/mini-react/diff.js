@@ -65,6 +65,11 @@ import patch from "./patch";
  *    b.不符合规则的代表位置发生了变化
  *
  */
+/**
+ * React 的diff策略和传统diff策略的区别：
+ * 1.React是同层对比，时间复杂度低
+ * 2.在跨层移动时，时间复杂度会高很多（因为会先删除，再创建）
+ */
 
 /*test*/
 
@@ -77,6 +82,15 @@ function diff(oldTree, newTree, createNode) {
  * tree diff:虚拟DOM树的diff策略
  * React在对比 新旧DOM，采取的是同层对比的策略，如果节点有跨层移动（跨父级移动）的情况下，React不考虑这个问题，
  * 会先从当前位置删掉该节点，在新位置创建该节点
+ */
+
+/**
+ * React有哪些优化点：
+ * 1.列表渲染时最好添加key属性
+ * 2.列表渲染最好使用memo或者shouldComponentUpdate进行更新优化
+ * 3.使用useEffect定义好依赖
+ * 4.在子函数中定义数据或者子函数时，最好使用useMemo或useCallBack
+ * 6.类组件中事件处理函数最好定义在原型中
  */
 
 /**
@@ -94,6 +108,9 @@ function diffNode(oldNode, newNode, createNode) {
   let newVDOM = oldNode;
   if (oldNode.type !== newNode.type) {
     // replace 节点替换
+    if(oldNode.type.isReactComponent){
+      console.log("组件即将被删除");
+    }
     patchs.push({
       type: "replace",
       parent,
@@ -137,6 +154,7 @@ function diffNode(oldNode, newNode, createNode) {
   }
   if(patchs.length>0){
     patch(patchs)
+    console.log(patchs);
   };
   return newVDOM;
 }
@@ -178,6 +196,7 @@ function updaterComponent(oldCmp, newCmp) {
 function setKeys(child) {
   let keys = {};
   child.forEach((item, index) => {
+    // console.log(item.key);
     let { key = index } = item;
     key = "k-" + key;
     keys[key] = item;
@@ -229,6 +248,9 @@ function diffChild(oldChild, newChild, createNode, parentNode) {
     // console.log(oldKeys[k]);
     if (newKeys[k] === undefined) {
       // console.log(oldKeys[k],"删除项");
+      if(oldKeys[k].type.isReactComponent){
+        console.log("组件即将被删除");
+      }
       patchs.push({
         type: "remove",
         node: oldKeys[k]._DOM,
@@ -237,7 +259,9 @@ function diffChild(oldChild, newChild, createNode, parentNode) {
   }
   if(patchs.length>0){
     patch(patchs);
+    console.log(patchs);
   }
+
   return newChildren;
 }
 
